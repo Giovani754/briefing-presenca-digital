@@ -6,9 +6,8 @@
  * Componente principal que orquestra o quiz multi-step.
  * Gerencia estado global, navegação, validação e submissão.
  */
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { useForm } from '@formspree/react';
 
 // Componentes de UI
 import ProgressBar from './components/ui/ProgressBar';
@@ -94,21 +93,13 @@ export default function App() {
   const [errors, setErrors] = useState({});
   // Direção da transição
   const [direction, setDirection] = useState(1);
-  // Erro de submissão local (para exibir mensagem amigável)
+  // Estado de submissão
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Erro de submissão (exibido inline)
   const [submitError, setSubmitError] = useState('');
 
-  // ==========================================
-  // FORMSPREE — Hook oficial
-  // ==========================================
-  const [formspreeState, formspreeSubmit] = useForm('mvvwnwaq');
-
-  // Quando o Formspree confirmar sucesso, navegar para tela de confirmação
-  useEffect(() => {
-    if (formspreeState.succeeded) {
-      setCurrentStep(TOTAL_STEPS - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [formspreeState.succeeded]);
+  // Endpoint Formspree
+  const FORMSPREE_URL = 'https://formspree.io/f/mvvwnwaq';
 
   // ==========================================
   // ATUALIZAR CAMPO
@@ -223,14 +214,14 @@ export default function App() {
   };
 
   // ==========================================
-  // SUBMISSÃO VIA @formspree/react
+  // SUBMISSÃO VIA FETCH DIRETO AO FORMSPREE
   // ==========================================
   const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
     setSubmitError('');
 
     // Montar payload formatado
     const payload = {
-      // Dados da empresa
       companyName: formData.companyName || '',
       contactName: formData.contactName || '',
       whatsapp: formData.whatsapp || '',
@@ -241,68 +232,69 @@ export default function App() {
       cityState: formData.location || '',
       businessStage: formData.companyStatus || '',
       businessDescription: formData.businessDescription || '',
-      // Objetivos
       mainGoal: formatValue(formData.objectives),
       otherObjective: formData.otherObjective || '',
       projectFocus: formData.projectFocus || '',
       projectGoalDescription: formData.projectGoalDescription || '',
-      // Solução
       solutionType: formatValue(formData.solutionTypes),
-      // Conteúdo / catálogo
       catalogType: formData.catalogType || '',
       showItems: formData.showItems || '',
       itemVolume: formData.itemQuantity || '',
       itemsChangeFrequency: formData.itemChangeFrequency || '',
       needsItemPage: formData.individualPages || '',
       catalogDescription: formData.catalogDescription || '',
-      // Autonomia
       autonomyPreference: formData.autonomyLevel || '',
       teamCapability: formData.teamCapability || '',
       frequentUpdates: formData.frequentUpdates || '',
-      // Funcionalidades
       features: formatValue(formData.features),
       otherFeature: formData.otherFeature || '',
-      // Materiais
       availableMaterials: formatValue(formData.materials),
       materialsDescription: formData.materialsDescription || '',
-      // Posicionamento
       brandPerception: formData.onlinePerception || '',
       businessDifferentials: formData.differentials || '',
       references: formData.visualReferences || '',
       unwantedElements: formData.unwantedElements || '',
-      // Prazo e investimento
       urgency: formData.urgency || '',
       investmentLevel: formData.investmentLevel || '',
       investmentRange: formData.investmentRange || '',
       scopePreference: formData.scopePreference || '',
       finalNotes: formData.additionalNotes || '',
-      // Metadados Formspree
-      _subject: `Novo Briefing — ${formData.companyName || 'Sem nome'}`,
+      _subject: `Novo Briefing \u2014 ${formData.companyName || 'Sem nome'}`,
       _replyto: formData.email || '',
       submittedAt: new Date().toISOString(),
       source: 'briefing-presenca-digital',
     };
 
-    // Log temporário para depuração — remover em produção
-    console.log('📋 Payload final enviado ao Formspree:', payload);
-    console.log('📊 Estado do Formspree:', formspreeState);
+    // Log temporário para depuração
+    console.log('\ud83d\udccb Payload final enviado ao Formspree:', payload);
 
     try {
-      // O hook @formspree/react aceita um objeto diretamente
-      await formspreeSubmit(payload);
+      const response = await fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      console.log('\ud83d\udce8 Resposta Formspree:', response.status, result);
+
+      if (!response.ok) {
+        throw new Error(result?.error || `Erro ${response.status}`);
+      }
+
+      // Sucesso \u2014 ir para tela de confirma\u00e7\u00e3o
+      setCurrentStep(TOTAL_STEPS - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Erro ao enviar:', error);
-      setSubmitError('Não foi possível enviar o briefing. Verifique sua conexão e tente novamente.');
+      setSubmitError('N\u00e3o foi poss\u00edvel enviar o briefing. Verifique sua conex\u00e3o e tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [formData, formspreeSubmit]);
-
-  // Detectar erros do Formspree e atualizar submitError
-  useEffect(() => {
-    if (formspreeState.errors && formspreeState.errors.length > 0) {
-      console.error('Erros Formspree:', formspreeState.errors);
-      setSubmitError('Não foi possível enviar o briefing. Verifique sua conexão e tente novamente.');
-    }
-  }, [formspreeState.errors]);
+  }, [formData, FORMSPREE_URL]);
 
   // ==========================================
   // RESET (voltar ao início)
@@ -362,8 +354,6 @@ export default function App() {
   const isReview = currentStep === TOTAL_STEPS - 2;
   const config = STEP_CONFIG[currentStep];
 
-  // Derivar estado de submissão do Formspree
-  const isSubmitting = formspreeState.submitting;
 
   return (
     <div className="app-container relative">
@@ -394,7 +384,7 @@ export default function App() {
 
         {/* Overlay de submissão */}
         <AnimatePresence>
-          {formspreeState.submitting && (
+          {isSubmitting && (
             <div
               className="fixed inset-0 z-50 flex items-center justify-center"
               style={{ backgroundColor: 'rgba(11, 15, 25, 0.85)', backdropFilter: 'blur(4px)' }}
