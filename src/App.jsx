@@ -98,8 +98,8 @@ export default function App() {
   // Erro de submissão (exibido inline)
   const [submitError, setSubmitError] = useState('');
 
-  // Endpoint Formspree
-  const FORMSPREE_URL = 'https://formspree.io/f/mvvwnwaq';
+  // Endpoint Google Apps Script
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb6DRoQ4xjTldF3Z3BWfEmXUk-pD7M9vSOWCDUwFPTJScjfs1vIzrpJdk19Y_fNSlddKw/exec';
 
   // ==========================================
   // ATUALIZAR CAMPO
@@ -254,6 +254,13 @@ export default function App() {
       businessDifferentials: formData.differentials || '',
       references: formData.visualReferences || '',
       unwantedElements: formData.unwantedElements || '',
+      brandIdentityDefined: formData.brandIdentityDefined || '',
+      brandColorsDefined: formData.brandColorsDefined || '',
+      primaryBrandColors: formData.primaryBrandColors || '',
+      preferredProjectColors: formData.preferredProjectColors || '',
+      colorsToAvoid: formData.colorsToAvoid || '',
+      desiredVisualStyle: formatValue(formData.desiredVisualStyle),
+      logoStatus: formData.logoStatus || '',
       urgency: formData.urgency || '',
       investmentLevel: formData.investmentLevel || '',
       investmentRange: formData.investmentRange || '',
@@ -266,20 +273,19 @@ export default function App() {
     };
 
     // Log temporário para depuração
-    console.log('\ud83d\udccb Payload final enviado ao Formspree:', payload);
+    console.log('\ud83d\udccb Payload final enviado ao Script:', payload);
 
     try {
-      const response = await fetch(FORMSPREE_URL, {
+      const response = await fetch(SCRIPT_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify(payload),
       });
 
       const result = await response.json();
-      console.log('\ud83d\udce8 Resposta Formspree:', response.status, result);
+      console.log('\ud83d\udce8 Resposta Script:', response.status, result);
 
       if (!response.ok) {
         throw new Error(result?.error || `Erro ${response.status}`);
@@ -294,7 +300,7 @@ export default function App() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, FORMSPREE_URL]);
+  }, [formData, SCRIPT_URL]);
 
   // ==========================================
   // RESET (voltar ao início)

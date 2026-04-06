@@ -15,7 +15,7 @@
 // - Formspree: "https://formspree.io/f/SEU_ID"
 // - Webhook: "https://seu-webhook.com/endpoint"
 // - Netlify Forms: deixe vazio e use o atributo netlify no form
-export const FORM_ENDPOINT = "https://formspree.io/f/mvvwnwaq";
+export const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbx6DRoQ4xjTldF3Z3BWfEmXUk-pD7M9vSOWCDUwFPTJScjfs1vIzrpJdk19Y_fNSlddKw/exec";
 
 // ==========================================
 // LABELS DAS ETAPAS (para barra de progresso)
@@ -248,8 +248,24 @@ export const MATERIALS_OPTIONS = [
 ];
 
 // ==========================================
-// ETAPA 10 — PRAZO E INVESTIMENTO
+// ETAPA 9 — POSICIONAMENTO E IDENTIDADE VISUAL
 // ==========================================
+export const BRAND_IDENTITY_OPTIONS = ["Sim", "Não", "Parcialmente"];
+export const BRAND_COLORS_OPTIONS = ["Sim", "Não", "Parcialmente"];
+export const LOGO_STATUS_OPTIONS = ["Sim", "Não", "Em desenvolvimento"];
+export const VISUAL_STYLE_OPTIONS = [
+  "Sofisticado",
+  "Moderno",
+  "Minimalista",
+  "Premium",
+  "Tecnológico",
+  "Criativo",
+  "Forte",
+  "Elegante",
+  "Acolhedor",
+  "Outro"
+];
+
 export const URGENCY_OPTIONS = [
   "Sim, preciso o quanto antes",
   "Tenho prazo, mas dá para organizar",
@@ -322,6 +338,13 @@ export const REVIEW_LABELS = {
   differentials: "Diferenciais do negócio",
   visualReferences: "Referências visuais",
   unwantedElements: "O que não quer no projeto",
+  brandIdentityDefined: "Identidade visual definida",
+  brandColorsDefined: "Cores da marca definidas",
+  primaryBrandColors: "Cores atuais",
+  preferredProjectColors: "Cores desejadas",
+  colorsToAvoid: "Cores a evitar",
+  desiredVisualStyle: "Estilo visual desejado",
+  logoStatus: "Status do logo",
   // Etapa 10
   urgency: "Urgência do projeto",
   investmentLevel: "Previsão de investimento",
@@ -371,6 +394,11 @@ export const REVIEW_SECTIONS = [
     title: "Posicionamento",
     icon: "Sparkles",
     fields: ["onlinePerception", "differentials", "visualReferences", "unwantedElements"],
+  },
+  {
+    title: "Identidade Visual",
+    icon: "Sparkles",
+    fields: ["brandIdentityDefined", "brandColorsDefined", "primaryBrandColors", "preferredProjectColors", "colorsToAvoid", "desiredVisualStyle", "logoStatus"],
   },
   {
     title: "Prazo e Investimento",
