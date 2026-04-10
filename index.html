@@ -14,7 +14,8 @@
     <div id="root"></div>
 
     <!-- Formulário invisível para detecção do Netlify Forms -->
-    <form name="briefing-estrategico" data-netlify="true" hidden>
+    <form name="briefing-estrategico" method="POST" data-netlify="true" hidden>
+      <input type="hidden" name="form-name" value="briefing-estrategico" />
       <input type="text" name="companyName" />
       <input type="text" name="contactName" />
       <input type="text" name="whatsapp" />
