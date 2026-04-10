@@ -98,9 +98,6 @@ export default function App() {
   // Erro de submissão (exibido inline)
   const [submitError, setSubmitError] = useState('');
 
-  // Endpoint Google Apps Script
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6DRoQ4xjTldF3Z3BWfEmXUk-pD7M9vSOWCDUwFPTJScjfs1vIzrpJdk19Y_fNSlddKw/exec';
-
   // ==========================================
   // ATUALIZAR CAMPO
   // ==========================================
@@ -214,7 +211,7 @@ export default function App() {
   };
 
   // ==========================================
-  // SUBMISSÃO VIA FETCH — Google Apps Script
+  // SUBMISSÃO VIA NETLIFY FORMS
   // ==========================================
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
@@ -222,6 +219,7 @@ export default function App() {
 
     // Montar payload formatado
     const payload = {
+      'form-name': 'briefing-estrategico',
       companyName: formData.companyName || '',
       contactName: formData.contactName || '',
       whatsapp: formData.whatsapp || '',
@@ -266,29 +264,31 @@ export default function App() {
       investmentRange: formData.investmentRange || '',
       scopePreference: formData.scopePreference || '',
       finalNotes: formData.additionalNotes || '',
-      _subject: `Novo Briefing \u2014 ${formData.companyName || 'Sem nome'}`,
+      _subject: `Novo Briefing — ${formData.companyName || 'Sem nome'}`,
       _replyto: formData.email || '',
       submittedAt: new Date().toISOString(),
       source: 'briefing-presenca-digital',
     };
 
-    // Adicionar JSON bruto completo para o Apps Script
+    // Adicionar JSON bruto completo
     payload.rawJson = JSON.stringify(payload);
 
-    // Log temporário para depuração
-    console.log('\ud83d\udccb Payload final enviado ao Script:', payload);
+    console.log('📤 Enviando para Netlify Forms');
+    console.log('📦 Payload final:', payload);
 
     try {
-      await fetch(SCRIPT_URL, {
+      // Converte payload para x-www-form-urlencoded
+      const body = new URLSearchParams(payload).toString();
+
+      await fetch('/', {
         method: 'POST',
-        mode: 'no-cors',
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(payload),
+        body,
       });
 
-      // Com mode: "no-cors" a resposta é opaca — sucesso se não houve erro de rede
+      console.log('✅ Envio concluído');
       setCurrentStep(TOTAL_STEPS - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -297,7 +297,7 @@ export default function App() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, SCRIPT_URL]);
+  }, [formData]);
 
   // ==========================================
   // RESET (voltar ao início)
