@@ -99,7 +99,7 @@ export default function App() {
   const [submitError, setSubmitError] = useState('');
 
   // Endpoint Google Apps Script
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycb6DRoQ4xjTldF3Z3BWfEmXUk-pD7M9vSOWCDUwFPTJScjfs1vIzrpJdk19Y_fNSlddKw/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6DRoQ4xjTldF3Z3BWfEmXUk-pD7M9vSOWCDUwFPTJScjfs1vIzrpJdk19Y_fNSlddKw/exec';
 
   // ==========================================
   // ATUALIZAR CAMPO
@@ -214,7 +214,7 @@ export default function App() {
   };
 
   // ==========================================
-  // SUBMISSÃO VIA FETCH DIRETO AO FORMSPREE
+  // SUBMISSÃO VIA FETCH — Google Apps Script
   // ==========================================
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
@@ -272,31 +272,28 @@ export default function App() {
       source: 'briefing-presenca-digital',
     };
 
+    // Adicionar JSON bruto completo para o Apps Script
+    payload.rawJson = JSON.stringify(payload);
+
     // Log temporário para depuração
     console.log('\ud83d\udccb Payload final enviado ao Script:', payload);
 
     try {
-      const response = await fetch(SCRIPT_URL, {
+      await fetch(SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-      console.log('\ud83d\udce8 Resposta Script:', response.status, result);
-
-      if (!response.ok) {
-        throw new Error(result?.error || `Erro ${response.status}`);
-      }
-
-      // Sucesso \u2014 ir para tela de confirma\u00e7\u00e3o
+      // Com mode: "no-cors" a resposta é opaca — sucesso se não houve erro de rede
       setCurrentStep(TOTAL_STEPS - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error('Erro ao enviar:', error);
-      setSubmitError('N\u00e3o foi poss\u00edvel enviar o briefing. Verifique sua conex\u00e3o e tente novamente.');
+      console.error('Erro no envio:', error);
+      setSubmitError('Não foi possível enviar o briefing. Verifique sua conexão e tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
